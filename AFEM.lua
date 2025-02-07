@@ -1086,100 +1086,106 @@ local function DOXTRK_fake_script() -- Fake Script: ServerStorage.AFEM.Menu.Area
     end
 
 	function levenshtein(str1, str2)
-		local len1 = string.len(str1)
-		local len2 = string.len(str2)
-		local matrix = {}
+	local len1 = string.len(str1)
+	local len2 = string.len(str2)
+	local matrix = {}
 	
-		-- Initialize base cases
-		for i = 0, len1 do
-			matrix[i] = {}
-			matrix[i][0] = i
-		end
-		for j = 0, len2 do
-			matrix[0][j] = j
-		end
-	
-		-- Calculate matrix
-		for i = 1, len1 do
-			for j = 1, len2 do
-				local cost = (str1:sub(i, i) == str2:sub(j, j)) and 0 or 1
-				matrix[i][j] = math.min(
-					matrix[i - 1][j] + 1,   -- Deletion
-					matrix[i][j - 1] + 1,   -- Insertion
-					matrix[i - 1][j - 1] + cost) -- Substitution
-			end
-		end
-	
-		return matrix[len1][len2]
+
+	-- Initialize base cases
+	for i = 0, len1 do
+		matrix[i] = {}
+		matrix[i][0] = i
 	end
-	
-	-- Function to perform fuzzy search with substring and case-insensitive matching
-	function fuzzySearch(query, items)
-		-- Normalize query and items to lowercase for case-insensitive matching
-		query = string.lower(query)
-	
-		local results = {}
-		for _, item in ipairs(items) do
-			local normalizedItem = string.lower(item)
-	
-			-- Check if query is a substring of item
-			local start, _ = string.find(normalizedItem, query)
-	
-			-- Calculate distance based on substring match or overall string
-			local distance = (start ~= nil)
-				and levenshtein(query, normalizedItem:sub(start, start + #query - 1))  -- Substring distance
-				or levenshtein(query, normalizedItem)                                  -- Whole string distance
-	
-			table.insert(results, {item = item, distance = distance, hasSubstring = start ~= nil})
-		end
-	
-		-- Sort results by distance (ascending), prioritizing substring matches and then alphabetical order
-		table.sort(results, function(a, b)
-			if a.distance ~= b.distance then
-				return a.distance < b.distance
-			elseif a.hasSubstring ~= b.hasSubstring then
-				return a.hasSubstring 
-			else
-				return a.item < b.item -- Sort alphabetically if distances and substring presence are equal
-			end
-		end)
-	
-		-- Extract sorted items
-		local sortedItems = {}
-		for _, result in ipairs(results) do
-			table.insert(sortedItems, result.item)
-		end
-	
-		return sortedItems
+	for j = 0, len2 do
+		matrix[0][j] = j
 	end
-	names = {}
-	repeat task.wait() until _G.AFEMEmoteList
-	for _, v in ipairs(_G.AFEMEmoteList) do
-		table.insert(names, v['name'])
-	end
-	repeat task.wait() until _G.AFEMAnimationPacksList
-	for _, v in ipairs(_G.AFEMAnimationPacksList) do
-		table.insert(names, v['name'])
-	end
-	script.Parent.TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-		local searchText = script.Parent.TextBox.Text
-		script.Parent.Area.CanvasPosition = Vector2.zero
-		if searchText == "" then
-			for _, button in ipairs(script.Parent.Area:GetChildren()) do
-				if button.Name == "Sample" then continue end
-				if not button:IsA("ImageButton") then continue end
-				button.LayoutOrder = 0
-			end
-			return
+
+	-- Calculate matrix
+	for i = 1, len1 do
+		for j = 1, len2 do
+			local cost = (str1:sub(i, i) == str2:sub(j, j)) and 0 or 1
+			matrix[i][j] = math.min(
+				matrix[i - 1][j] + 1,   -- Deletion
+				matrix[i][j - 1] + 1,   -- Insertion
+				matrix[i - 1][j - 1] + cost) -- Substitution
 		end
-		local result = fuzzySearch(searchText, names)
-	
-		for sort, item in ipairs(result) do
-			if script.Parent.Area:FindFirstChild(item) then
-				script.Parent.Area:FindFirstChild(item).LayoutOrder = sort
-			end
+	end
+
+	return matrix[len1][len2]
+end
+
+-- Function to perform fuzzy search with substring and case-insensitive matching
+function fuzzySearch(query, items)
+	-- Normalize query and items to lowercase for case-insensitive matching
+	query = string.lower(query)
+
+	local results = {}
+	for _, item in ipairs(items) do
+		local normalizedItem = string.lower(item)
+
+		-- Check if query is a substring of item
+		local start, _ = string.find(normalizedItem, query)
+
+		-- Calculate distance based on substring match or overall string
+		local distance = (start ~= nil)
+			and levenshtein(query, normalizedItem:sub(start, start + #query - 1))  -- Substring distance
+			or levenshtein(query, normalizedItem)                                  -- Whole string distance
+
+		table.insert(results, {item = item, distance = distance, hasSubstring = start ~= nil})
+	end
+
+	-- Sort results by distance (ascending), prioritizing substring matches and then alphabetical order
+	table.sort(results, function(a, b)
+		if a.distance ~= b.distance then
+			return a.distance < b.distance
+		elseif a.hasSubstring ~= b.hasSubstring then
+			return a.hasSubstring 
+		else
+			return a.item < b.item -- Sort alphabetically if distances and substring presence are equal
 		end
 	end)
+
+	-- Extract sorted items
+	local sortedItems = {}
+	for _, result in ipairs(results) do
+		table.insert(sortedItems, result.item)
+	end
+
+	return sortedItems
+end
+
+local names = {}
+repeat task.wait() until _G.AFEMEmoteList
+print("[AFEM] - SEARCH - Waiting for Emotes...")
+for _, v in ipairs(_G.AFEMEmoteList) do
+	table.insert(names, v['name'])
+end
+print("[AFEM] - SEARCH - Waiting for Animation packs...")
+repeat task.wait() until _G.AFEMAnimationPacksList
+for _, v in ipairs(_G.AFEMAnimationPacksList) do
+	table.insert(names, v['Name'])
+end
+print("[AFEM] - SEARCH - Ready.")
+script.Parent.TextBox:GetPropertyChangedSignal("Text"):Connect(function()
+	local searchText = script.Parent.TextBox.Text
+	script.Parent.Area.CanvasPosition = Vector2.zero
+	if searchText == "" then
+		for _, button in ipairs(script.Parent.Area:GetChildren()) do
+			if button.Name == "Sample" then continue end
+			if not button:IsA("ImageButton") then continue end
+			button.LayoutOrder = 0
+		end
+		return
+	end
+	local result = fuzzySearch(searchText, names)
+
+	for sort, item in ipairs(result) do
+		local found = script.Parent.Area:FindFirstChild(item .. "EMOTE") or script.Parent.Area:FindFirstChild(item .. "ANPACK")
+		if found then
+			found.LayoutOrder = sort
+		end
+	end
+end)
 end
 local function IFCGSF_fake_script() -- Fake Script: ServerStorage.AFEM.Menu.Area.Switch.Switch
     local script = Instance.new("LocalScript")
