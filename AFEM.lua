@@ -1398,22 +1398,24 @@ local function YPOKF_fake_script() -- Fake Script: ServerStorage.AFEM.EmoteList
 
 	--task.wait(5)
 	local http = game:GetService("HttpService")
-	local s = pcall(function()
+	local s, e = pcall(function()
 		print("[AFEM] -  Pulling emotes from GitHub repo...")
 		_G.AFEMEmoteList = http:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/AFEM/refs/heads/main/emotes.json"))
 	end)
 	if not s then
+		warn(e)
 		print("[AFEM] - Getting from website failed. Using fallback...")
 		-- There's no fallback.
 		_G.AFEMEmoteList = http:JSONDecode('[{"id":14353423348,"animationid":"http://www.roblox.com/asset/?id=14352343065","name":"BabyQueen-BouncyTwirl"}]')
 	end
 	print("[AFEM] - Emote list listed.")
 	
-	local s = pcall(function()
+	local s, e = pcall(function()
 		print("[AFEM] -  Pulling animation packs from GitHub repo...")
 		_G.AFEMAnimationPacksList = http:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/Joystickplays/AFEM/refs/heads/main/animationpacks.json"))
 	end)
 	if not s then
+		warn(e)
 		print("[AFEM] - Getting from website failed. Using fallback...")
 		-- There's no fallback.
 		_G.AFEMAnimationPacksList = http:JSONDecode('[{"_comment":"All animation IDs has been pulled independently by the YARHM Team. If you are gonna use this for your own emotes menu, please credit us. We will be updating this list periodically and automatically."},{"CustomImage":"rbxassetid://18812005744","Name":"Confident","ProductId":0,"Animations":{"walk":{"WalkAnim":"http://www.roblox.com/asset/?id=1070017263"},"swimidle":{"SwimIdle":"http://www.roblox.com/asset/?id=1070012133"},"idle":{"Animation1":"http://www.roblox.com/asset/?id=1069977950","Animation2":"http://www.roblox.com/asset/?id=1069987858"},"climb":{"ClimbAnim":"http://www.roblox.com/asset/?id=1069946257"},"jump":{"JumpAnim":"http://www.roblox.com/asset/?id=1069984524"},"fall":{"FallAnim":"http://www.roblox.com/asset/?id=1069973677"},"run":{"RunAnim":"http://www.roblox.com/asset/?id=1070001516"},"swim":{"Swim":"http://www.roblox.com/asset/?id=1070009914"}},"BundleId":0}]')
