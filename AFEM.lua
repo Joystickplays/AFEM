@@ -2576,6 +2576,7 @@ local function JNUJBEB_fake_script() -- Fake Script: StarterGui.AFEM.Menu.Settin
 			minimizeStartupState = true
 			pSAFEM:set("MinimizeOnStartup", "1")
 		end
+   end)
 	
 	
 	-- Reset persistent animation pack
