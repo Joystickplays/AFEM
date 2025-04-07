@@ -1,3 +1,5 @@
+-- AFEM v2.1
+
 if not game:IsLoaded() then
 	game:GetService("StarterGui"):SetCore("SendNotification", {
 		Title = "Script loading",
